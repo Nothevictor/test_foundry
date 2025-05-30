@@ -1,15 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
+<<<<<<< HEAD
 pragma solidity ^0.8.30;
+=======
+pragma solidity ^0.8.13;
+>>>>>>> 844acef0e00fbfc223c63d58146530c137503634
 
 import {Test, console} from "forge-std/Test.sol";
 import {Counter} from "../src/Counter.sol";
 
 contract CounterTest is Test {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 844acef0e00fbfc223c63d58146530c137503634
     Counter public counter;
 
     function setUp() public {
         counter = new Counter();
+<<<<<<< HEAD
     }
 
     function test_InitialNumber() public {
@@ -60,3 +68,18 @@ contract CounterTest is Test {
         counter.decrement();
     }
 }
+=======
+        counter.setNumber(0);
+    }
+
+    function test_Increment() public {
+        counter.increment();
+        assertEq(counter.number(), 1);
+    }
+
+    function testFuzz_SetNumber(uint256 x) public {
+        counter.setNumber(x);
+        assertEq(counter.number(), x);
+    }
+}
+>>>>>>> 844acef0e00fbfc223c63d58146530c137503634
