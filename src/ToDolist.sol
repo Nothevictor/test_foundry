@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30;
+pragma solidity ^0.8.21;
 
 /// @title SimpleTodoList - Basic task manager
 /// @notice Users can add, update, complete, and delete their own tasks

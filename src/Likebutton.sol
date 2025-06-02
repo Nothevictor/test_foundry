@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.30;
+pragma solidity ^0.8.21;
 
 contract LikeButton {
     mapping (address => bool) public liked;

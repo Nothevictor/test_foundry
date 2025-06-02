@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30;
+pragma solidity ^0.8.21;
 
 import "forge-std/Test.sol";
-import "../src/SimpleTodoList.sol"; // Убедитесь, что путь к вашему контракту верный
+import "../src/ToDolist.sol";
 
 contract SimpleTodoListTest is Test {
     SimpleTodoList public todoList;
@@ -23,7 +23,7 @@ contract SimpleTodoListTest is Test {
     // --- Тесты для addTask ---
 
     function test_addTask_succeedsAndEmitsEvent() public {
-        string memory taskText = "Купить продукты";
+        string memory taskText = unicode"Купить продукты";
 
         // Ожидаем событие TaskAdded
         vm.expectEmit(true, true, true, true, address(todoList));
@@ -40,18 +40,18 @@ contract SimpleTodoListTest is Test {
     }
 
     function test_addTask_multipleTasksForSameUser() public {
-        todoList.addTask("Задача 1");
-        todoList.addTask("Задача 2");
+        todoList.addTask(unicode"Задача 1");
+        todoList.addTask(unicode"Задача 2");
 
         SimpleTodoList.Task[] memory tasks = todoList.getMyTasks();
         assertEq(tasks.length, 2, "Task count should be 2");
-        assertEq(tasks[0].text, "Задача 1");
-        assertEq(tasks[1].text, "Задача 2");
+        assertEq(tasks[0].text, unicode"Задача 1");
+        assertEq(tasks[1].text, unicode"Задача 2");
     }
 
     function test_addTask_differentUsers() public {
-        string memory taskUser1 = "Задача для user1";
-        string memory taskUserThis = "Задача для this";
+        string memory taskUser1 = unicode"Задача для user1";
+        string memory taskUserThis = unicode"Задача для this";
 
         // User1 добавляет задачу
         vm.prank(user1);
@@ -85,8 +85,8 @@ contract SimpleTodoListTest is Test {
     // --- Тесты для updateTask ---
 
     function test_updateTask_succeedsAndEmitsEvent() public {
-        todoList.addTask("Старая задача");
-        string memory newTaskText = "Новая задача";
+        todoList.addTask(unicode"Старая задача");
+        string memory newTaskText = unicode"Новая задача";
 
         // Ожидаем событие TaskUpdated
         vm.expectEmit(true, true, true, true, address(todoList));
@@ -99,23 +99,23 @@ contract SimpleTodoListTest is Test {
     }
 
     function test_updateTask_fails_invalidIndex() public {
-        todoList.addTask("Задача есть");
+        todoList.addTask(unicode"Задача есть");
 
         // Ожидаем revert с сообщением "Invalid task index"
         vm.expectRevert(bytes("Invalid task index"));
-        todoList.updateTask(1, "Попытка обновить несуществующую задачу");
+        todoList.updateTask(1, unicode"Попытка обновить несуществующую задачу");
     }
 
     function test_updateTask_fails_noTasks() public {
         // Ожидаем revert, так как список задач пуст
         vm.expectRevert(bytes("Invalid task index"));
-        todoList.updateTask(0, "Попытка обновить в пустом списке");
+        todoList.updateTask(0, unicode"Попытка обновить в пустом списке");
     }
 
     // --- Тесты для completeTask ---
 
     function test_completeTask_succeedsAndEmitsEvent() public {
-        todoList.addTask("Выполнить это");
+        todoList.addTask(unicode"Выполнить это");
 
         // Ожидаем событие TaskCompleted
         vm.expectEmit(true, true, false, true, address(todoList)); // text не индексируется и не передается
@@ -128,14 +128,14 @@ contract SimpleTodoListTest is Test {
     }
 
     function test_completeTask_fails_invalidIndex() public {
-        todoList.addTask("Задача для проверки индекса");
+        todoList.addTask(unicode"Задача для проверки индекса");
 
         vm.expectRevert(bytes("Invalid task index"));
         todoList.completeTask(1);
     }
 
     function test_completeTask_idempotent() public {
-        todoList.addTask("Задача для двойного выполнения");
+        todoList.addTask(unicode"Задача для двойного выполнения");
         todoList.completeTask(0); // Первое выполнение
 
         // Ожидаем событие TaskCompleted снова
@@ -151,9 +151,9 @@ contract SimpleTodoListTest is Test {
     // --- Тесты для deleteTask ---
 
     function test_deleteTask_succeeds_middleAndEmitsEvent() public {
-        todoList.addTask("Задача 1"); // index 0
-        todoList.addTask("Задача 2"); // index 1 (будет удалена)
-        todoList.addTask("Задача 3"); // index 2
+        todoList.addTask(unicode"Задача 1"); // index 0
+        todoList.addTask(unicode"Задача 2"); // index 1 (будет удалена)
+        todoList.addTask(unicode"Задача 3"); // index 2
 
         // Ожидаем событие TaskDeleted
         // При удалении элемента не из конца, taskId в событии остается _index удаляемого,
@@ -165,13 +165,13 @@ contract SimpleTodoListTest is Test {
 
         SimpleTodoList.Task[] memory tasks = todoList.getMyTasks();
         assertEq(tasks.length, 2, "Task count should be 2 after deletion");
-        assertEq(tasks[0].text, "Задача 1", "First task should remain");
-        assertEq(tasks[1].text, "Задача 3", "Last task should now be at index 1");
+        assertEq(tasks[0].text, unicode"Задача 1", "First task should remain");
+        assertEq(tasks[1].text, unicode"Задача 3", "Last task should now be at index 1");
     }
 
     function test_deleteTask_succeeds_last() public {
-        todoList.addTask("Задача A");
-        todoList.addTask("Задача B"); // index 1 (будет удалена)
+        todoList.addTask(unicode"Задача A");
+        todoList.addTask(unicode"Задача B"); // index 1 (будет удалена)
 
         vm.expectEmit(true, true, false, true, address(todoList));
         emit TaskDeleted(address(this), 1);
@@ -180,11 +180,11 @@ contract SimpleTodoListTest is Test {
 
         SimpleTodoList.Task[] memory tasks = todoList.getMyTasks();
         assertEq(tasks.length, 1, "Task count should be 1 after deleting last");
-        assertEq(tasks[0].text, "Задача A", "First task should remain");
+        assertEq(tasks[0].text, unicode"Задача A", "First task should remain");
     }
 
     function test_deleteTask_succeeds_onlyTask() public {
-        todoList.addTask("Единственная задача");
+        todoList.addTask(unicode"Единственная задача");
 
         vm.expectEmit(true, true, false, true, address(todoList));
         emit TaskDeleted(address(this), 0);
@@ -196,7 +196,7 @@ contract SimpleTodoListTest is Test {
     }
 
     function test_deleteTask_fails_invalidIndex() public {
-        todoList.addTask("Задача для проверки индекса при удалении");
+        todoList.addTask(unicode"Задача для проверки индекса при удалении");
 
         vm.expectRevert(bytes("Invalid task index"));
         todoList.deleteTask(1);
@@ -216,19 +216,19 @@ contract SimpleTodoListTest is Test {
     function test_access_userCannotUpdateAnotherUsersTaskDirectly() public {
         // User1 добавляет задачу
         vm.startPrank(user1);
-        todoList.addTask("Задача User1");
+        todoList.addTask(unicode"Задача User1");
         vm.stopPrank();
 
         // User2 (address(this)) пытается обновить задачу с индексом 0.
         // Это будет относиться к списку задач User2, а не User1.
         // Если у User2 нет задач, это вызовет revert "Invalid task index".
         vm.expectRevert(bytes("Invalid task index"));
-        todoList.updateTask(0, "Попытка User2 обновить задачу User1");
+        todoList.updateTask(0, unicode"Попытка User2 обновить задачу User1");
 
         // Проверяем, что задача User1 не изменилась
         vm.startPrank(user1);
         SimpleTodoList.Task[] memory tasksUser1 = todoList.getMyTasks();
-        assertEq(tasksUser1[0].text, "Задача User1", "Задача User1 не должна была измениться");
+        assertEq(tasksUser1[0].text, unicode"Задача User1", unicode"Задача User1 не должна была измениться");
         vm.stopPrank();
     }
 }
